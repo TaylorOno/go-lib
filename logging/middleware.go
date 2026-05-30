@@ -1,9 +1,12 @@
 package logging
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -88,4 +91,17 @@ func (r *responseRecorder) WriteHeader(statusCode int) {
 func (r *responseRecorder) Write(b []byte) (int, error) {
 	r.body.Write(b)
 	return r.ResponseWriter.Write(b)
+}
+
+func (r *responseRecorder) Flush() {
+	if f, ok := r.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func (r *responseRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if h, ok := r.ResponseWriter.(http.Hijacker); ok {
+		return h.Hijack()
+	}
+	return nil, nil, errors.New("ResponseWriter does not support Hijacker")
 }

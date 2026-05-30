@@ -1,6 +1,9 @@
 package metrics
 
 import (
+	"bufio"
+	"errors"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -51,4 +54,17 @@ func newResponseRecorder(w http.ResponseWriter) *responseRecorder {
 func (lrw *responseRecorder) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func (lrw *responseRecorder) Flush() {
+	if f, ok := lrw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func (lrw *responseRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if h, ok := lrw.ResponseWriter.(http.Hijacker); ok {
+		return h.Hijack()
+	}
+	return nil, nil, errors.New("ResponseWriter does not support Hijacker")
 }
