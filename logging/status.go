@@ -29,5 +29,5 @@ func (status Status) String() string {
 }
 
 func (status Status) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("{\"%s\":\"%s\"}", status.name, status.message)), nil
+	return fmt.Appendf(nil, "{\"%s\":\"%s\"}", status.name, status.message), nil
 }

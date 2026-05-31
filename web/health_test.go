@@ -25,7 +25,7 @@ func TestHealthHandler_JSONResponse(t *testing.T) {
 		t.Errorf("expected status %d, got %d", http.StatusServiceUnavailable, recorder.Code)
 	}
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.Unmarshal(recorder.Body.Bytes(), &response)
 	if err != nil {
 		t.Fatalf("failed to unmarshal JSON: %v", err)
@@ -35,7 +35,7 @@ func TestHealthHandler_JSONResponse(t *testing.T) {
 		t.Errorf("expected status DOWN, got %v", response["status"])
 	}
 
-	checks, ok := response["checks"].(map[string]interface{})
+	checks, ok := response["checks"].(map[string]any)
 	if !ok {
 		t.Fatalf("expected checks to be a map, got %T", response["checks"])
 	}

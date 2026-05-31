@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"maps"
 	"net/http"
 	"sync"
 
@@ -156,9 +157,7 @@ func (p *PrometheusReporter) GetMetricsDefinition() map[string]MetricDefinition 
 	// Creating a copy to avoid exposing the internal map to external manipulation
 	metrics := make(map[string]MetricDefinition)
 	p.RLock()
-	for k, v := range p.metricRegistry {
-		metrics[k] = v
-	}
+	maps.Copy(metrics, p.metricRegistry)
 	p.RUnlock()
 	return metrics
 }

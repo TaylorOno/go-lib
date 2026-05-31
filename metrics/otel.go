@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"maps"
 	"net/http"
 	"sync"
 
@@ -171,9 +172,7 @@ func (r *OTELReporter) GetMetricsDefinition() map[string]MetricDefinition {
 	// Creating a copy to avoid exposing the internal map to external manipulation
 	metrics := make(map[string]MetricDefinition)
 	r.RLock()
-	for k, v := range r.metricRegistry {
-		metrics[k] = v
-	}
+	maps.Copy(metrics, r.metricRegistry)
 	r.RUnlock()
 	return metrics
 }
