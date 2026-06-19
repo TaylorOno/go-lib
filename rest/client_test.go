@@ -21,7 +21,7 @@ func TestClientFunc_Do(t *testing.T) {
 	client := NewClientBuilder("test").
 		WithMetricRegistry(metrics.NewPrometheusReporter()).
 		WithMiddleware(
-			Verbose().RequestLogger(),
+			VerboseLogging(),
 		).
 		Build()
 

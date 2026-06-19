@@ -17,6 +17,8 @@ func ComponentLoggerFor(name string) slog.Handler {
 	return &ComponentHandler{name: strings.Join([]string{name, "logging"}, "."), Handler: handler}
 }
 
+// Enabled determines if a log entry with the given level should be logged based on the component's log level settings.
+// The helper method WithEnabledFunction can be used to set a custom function to determine if a log entry should be logged.
 func (h *ComponentHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	if logLevelFunc != nil {
 		return logLevelFunc(h.name) <= level

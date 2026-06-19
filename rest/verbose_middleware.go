@@ -16,19 +16,25 @@ type VerboseMiddleware struct {
 	logger *slog.Logger
 }
 
-func Verbose() *VerboseMiddleware {
-	return &VerboseMiddleware{
-		logger: slog.Default(),
+type VerboseOptFunc func(*VerboseMiddleware)
+
+func UsingLogger(log slog.Handler) VerboseOptFunc {
+	return func(v *VerboseMiddleware) {
+		v.logger = slog.New(log)
 	}
 }
 
-func (v *VerboseMiddleware) WithHandler(handler slog.Handler) *VerboseMiddleware {
-	v.logger = slog.New(handler)
-	return v
-}
+// VerboseLogging returns a middleware that logs HTTP requests and responses for a client with optional configurations.
+// Debug with log request URL and response code while Trace will log the full request and response including headers and body.
+func VerboseLogging(opts ...VerboseOptFunc) ClientMiddleware {
+	v := &VerboseMiddleware{
+		logger: slog.Default(),
+	}
 
-// RequestLogger prints basic request information to standard output
-func (v *VerboseMiddleware) RequestLogger() ClientMiddleware {
+	for _, o := range opts {
+		o(v)
+	}
+
 	return func(c Doer) Doer {
 		return ClientFunc(func(req *http.Request) (*http.Response, error) {
 			v.logRequest(req)
