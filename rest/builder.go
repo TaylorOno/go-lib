@@ -33,6 +33,7 @@ type ClientBuilder struct {
 	clientTimeout   time.Duration
 	ThrottleLimit   int
 	metricsReporter MetricsReporter
+	tracer          Tracer
 	middlewares     []ClientMiddleware
 }
 
@@ -64,6 +65,11 @@ func NewClientBuilder(clientName string) *ClientBuilder {
 
 func (b *ClientBuilder) WithMetricRegistry(metricsReporter MetricsReporter) *ClientBuilder {
 	b.metricsReporter = metricsReporter
+	return b
+}
+
+func (b *ClientBuilder) WithTracer(tracer Tracer) *ClientBuilder {
+	b.tracer = tracer
 	return b
 }
 
@@ -130,6 +136,10 @@ func (b *ClientBuilder) Build() *Client {
 		b.middlewares = append(b.middlewares, Throttler(client, b.ThrottleLimit, 10*time.Second, MetricOnReport(b.metricsReporter)))
 	} else {
 		b.middlewares = append(b.middlewares, Throttler(client, b.ThrottleLimit, 10*time.Second, NoOpReport))
+	}
+
+	if b.tracer != nil {
+		b.middlewares = append(b.middlewares, Trace(b.clientName, b.tracer))
 	}
 
 	// Wrap the base client with all the middleware

@@ -18,7 +18,7 @@ func ComponentLoggerFor(name string) slog.Handler {
 }
 
 // Enabled determines if a log entry with the given level should be logged based on the component's log level settings.
-// The helper method WithEnabledFunction can be used to set a custom function to determine if a log entry should be logged.
+// When a logLevelFunc has been configured via WithEnabledFunction, ComponentHandler log levels can be individually controlled with the key `{{name}}.logging`.
 func (h *ComponentHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	if logLevelFunc != nil {
 		return logLevelFunc(h.name) <= level
