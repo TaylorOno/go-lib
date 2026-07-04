@@ -1,11 +1,15 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/taylorono/go-lib/traces"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -24,6 +28,10 @@ type MetricsReporter interface {
 	SetGauge(name string, value float64, labels ...string)
 	ObserveSummary(name string, value float64, labelsValues ...string)
 	ObserveHistogram(name string, value float64, labelsValues ...string)
+}
+
+type Tracer interface {
+	Start(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, traces.Span)
 }
 
 // StatsHandler is a function that can be called to observer client call related metrics.

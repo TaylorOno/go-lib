@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/taylorono/go-lib/metrics"
+	"github.com/taylorono/go-lib/traces"
 )
 
 type OptionFunc func(*Server)
@@ -31,6 +32,12 @@ func WithMetricRegistry(registry metrics.Reporter) OptionFunc {
 
 		// Add default instrumentation middleware
 		o.middleware = append(o.middleware, metrics.HttpMiddleware(registry))
+	}
+}
+
+func WithTracer(provider traces.Provider) OptionFunc {
+	return func(o *Server) {
+		o.middleware = append(o.middleware, traces.HttpMiddleware(provider))
 	}
 }
 
