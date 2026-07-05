@@ -57,30 +57,28 @@ func (s *Server) RegisterReadinessCheck(name string, check Check) {
 }
 
 // ReadinessHandler returns a handler that checks all registered readiness checks.
-func (s *Server) readinessHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		results := s.readinessRegistry.run(r.Context())
+func (s *Server) readinessHandler(w http.ResponseWriter, r *http.Request) {
+	results := s.readinessRegistry.run(r.Context())
 
-		status := http.StatusOK
-		response := healthResponse{
-			Status: StatusUp,
-			Checks: make(map[string]string),
-		}
-
-		for name, err := range results {
-			if err != nil {
-				status = http.StatusServiceUnavailable
-				response.Status = StatusDown
-				response.Checks[name] = err.Error()
-			} else {
-				response.Checks[name] = StatusUp
-			}
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-		_ = json.NewEncoder(w).Encode(response)
+	status := http.StatusOK
+	response := healthResponse{
+		Status: StatusUp,
+		Checks: make(map[string]string),
 	}
+
+	for name, err := range results {
+		if err != nil {
+			status = http.StatusServiceUnavailable
+			response.Status = StatusDown
+			response.Checks[name] = err.Error()
+		} else {
+			response.Checks[name] = StatusUp
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // RegisterLivenessCheck adds a new check to the liveness probe.
@@ -90,18 +88,16 @@ func (s *Server) RegisterLivenessCheck(name string, check Check) {
 }
 
 // LivenessHandler returns a handler that checks all registered liveness checks.
-func (s *Server) livenessHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		results := s.livenessRegistry.run(r.Context())
+func (s *Server) livenessHandler(w http.ResponseWriter, r *http.Request) {
+	results := s.livenessRegistry.run(r.Context())
 
-		for _, err := range results {
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+	for _, err := range results {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "OK")
 	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
 }

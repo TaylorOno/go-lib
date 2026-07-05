@@ -91,6 +91,22 @@ func (b *ClientBuilder) WithClient(client *http.Client) *ClientBuilder {
 	return b
 }
 
+func (b *ClientBuilder) WithInfo(name string, version string, commit string) *ClientBuilder {
+	b.middlewares = append(b.middlewares, InfoMiddleware(name, version, commit))
+	return b
+}
+
+func InfoMiddleware(name string, version string, commit string) ClientMiddleware {
+	return func(c Doer) Doer {
+		return ClientFunc(func(r *http.Request) (*http.Response, error) {
+			r.Header.Set("X-Service-Name", name)
+			r.Header.Set("X-Service-Version", version)
+			r.Header.Set("X-Service-Commit", commit)
+			return c.Do(r)
+		})
+	}
+}
+
 func (b *ClientBuilder) Build() *Client {
 	client := &Client{
 		clientName: b.clientName,

@@ -18,8 +18,7 @@ func TestHealthHandler_JSONResponse(t *testing.T) {
 	req := httptest.NewRequest("GET", "/readyz", nil)
 	recorder := httptest.NewRecorder()
 
-	handler := s.readinessHandler()
-	handler.ServeHTTP(recorder, req)
+	s.readinessHandler(recorder, req)
 
 	if recorder.Code != http.StatusServiceUnavailable {
 		t.Errorf("expected status %d, got %d", http.StatusServiceUnavailable, recorder.Code)
@@ -52,8 +51,7 @@ func TestLivenessHandler_SimpleOK(t *testing.T) {
 	req := httptest.NewRequest("GET", "/healthz", nil)
 	rr := httptest.NewRecorder()
 
-	handler := s.livenessHandler()
-	handler.ServeHTTP(rr, req)
+	s.livenessHandler(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, rr.Code)

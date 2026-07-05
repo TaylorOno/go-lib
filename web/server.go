@@ -38,6 +38,7 @@ type Server struct {
 	shutdownTimeout   time.Duration
 	httpServer        *http.Server
 	mux               *http.ServeMux
+	info              statusInfo
 	readinessRegistry *healthRegistry
 	livenessRegistry  *healthRegistry
 	middleware        []Middleware
@@ -54,6 +55,10 @@ func NewServer(opts ...OptionFunc) *Server {
 		livenessRegistry:  newHealthRegistry(),
 		middleware:        []Middleware{},
 		httpServer:        &http.Server{},
+		info: statusInfo{
+			StartupTime: time.Now(),
+			Info:        make(map[string]interface{}),
+		},
 	}
 
 	// apply config overrides
@@ -114,8 +119,11 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 
 	// Register health endpoints
-	s.mux.HandleFunc("/healthz", s.livenessHandler())
-	s.mux.HandleFunc("/readyz", s.readinessHandler())
+	s.mux.HandleFunc("/healthz", s.livenessHandler)
+	s.mux.HandleFunc("/readyz", s.readinessHandler)
+
+	// Register info endpoint
+	s.mux.HandleFunc("/info", s.infoHandler)
 
 	// Server loop
 	go func() {

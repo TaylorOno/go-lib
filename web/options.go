@@ -54,3 +54,12 @@ func WithLivenessCheck(name string, check Check) OptionFunc {
 		s.RegisterLivenessCheck(name, check)
 	}
 }
+
+// WithInfo adds information about the service that can will be exposed via the /info endpoint.
+func WithInfo(serviceName, serviceVersion, gitCommit string) OptionFunc {
+	return func(s *Server) {
+		s.info.Info["serviceName"] = serviceName
+		s.info.Info["serviceVersion"] = serviceVersion
+		s.info.Info["gitCommit"] = gitCommit
+	}
+}
