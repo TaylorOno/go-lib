@@ -18,9 +18,9 @@ type VerboseMiddleware struct {
 
 type VerboseOptFunc func(*VerboseMiddleware)
 
-func UsingLogger(log slog.Handler) VerboseOptFunc {
+func UsingLogger(log *slog.Logger) VerboseOptFunc {
 	return func(v *VerboseMiddleware) {
-		v.logger = slog.New(log)
+		v.logger = log
 	}
 }
 

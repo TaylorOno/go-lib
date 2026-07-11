@@ -13,8 +13,9 @@ type ComponentHandler struct {
 	slog.Handler
 }
 
-func ComponentLoggerFor(name string) slog.Handler {
-	return &ComponentHandler{name: strings.Join([]string{name, "logging"}, "."), Handler: handler}
+func ComponentLoggerFor(name string) *slog.Logger {
+	componentHandler := &ComponentHandler{name: strings.Join([]string{name, "logging"}, "."), Handler: globalHandler}
+	return slog.New(componentHandler)
 }
 
 // Enabled determines if a log entry with the given level should be logged based on the component's log level settings.

@@ -30,8 +30,8 @@ func WithMetricReporter(m MetricsReporter) {
 }
 
 // Metric adds a metric to the log entry.
-func Metric(status Status) slog.Attr {
-	return slog.Any(_logMetric, status)
+func Metric(name string, message string) slog.Attr {
+	return slog.Any(_logMetric, NewStatus(name, message))
 }
 
 // emitMetric will emit a metric if a metric reporter is configured and a metric is present in the log entry.

@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	lvl          slog.Level
-	enableJSON   bool
-	enableSource bool
-	handler      slog.Handler
+	lvl           slog.Level
+	enableJSON    bool
+	enableSource  bool
+	globalHandler slog.Handler
 )
 
 func init() {
@@ -29,7 +29,7 @@ func Level() slog.Level {
 // InitLogger initializes the base logger configured via program flags.
 func InitLogger(_ context.Context) {
 	if testing.Testing() {
-		handler = slog.Default().Handler()
+		globalHandler = slog.Default().Handler()
 		return
 	}
 
@@ -37,12 +37,12 @@ func InitLogger(_ context.Context) {
 	opts := &slog.HandlerOptions{Level: lvl, AddSource: enableSource}
 	writer := &WriterReporter{os.Stdout}
 	if !enableJSON {
-		handler = &BaseHandler{slog.NewTextHandler(writer, opts)}
+		globalHandler = &BaseHandler{slog.NewTextHandler(writer, opts)}
 	} else {
-		handler = &BaseHandler{slog.NewJSONHandler(writer, opts)}
+		globalHandler = &BaseHandler{slog.NewJSONHandler(writer, opts)}
 	}
 
-	slog.SetDefault(slog.New(handler))
+	slog.SetDefault(slog.New(globalHandler))
 	return
 }
 
@@ -55,11 +55,11 @@ func WithEnabledFunction(lvlFunc func(key string) slog.Level) func(context.Conte
 }
 
 func GetHandler() slog.Handler {
-	if handler == nil {
+	if globalHandler == nil {
 		InitLogger(context.Background())
 	}
 
-	return handler
+	return globalHandler
 }
 
 type WriterReporter struct {
